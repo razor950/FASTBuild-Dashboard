@@ -191,10 +191,17 @@ namespace FastBuild.Dashboard
 			AppBootstrapper.CreateShadowContext(shadowPath);
 			SingleInstance<App>.Cleanup();
 
+			var ShadowWorkingDir = Directory.GetCurrentDirectory();
+			if (File.Exists(Path.Combine(Path.GetDirectoryName(shadowPath), "FBuild", "FBuildWorker.exe")))
+			{
+				ShadowWorkingDir = Path.GetDirectoryName(shadowPath);
+			}
+
 			Process.Start(new ProcessStartInfo
 			{
 				FileName = shadowPath,
-				Arguments = string.Join(" ", e.Args.Concat(new[] { AppArguments.ShadowProc }))
+				Arguments = string.Join(" ", e.Args.Concat(new[] { AppArguments.ShadowProc })),
+				WorkingDirectory = ShadowWorkingDir
 			});
 		}
 
