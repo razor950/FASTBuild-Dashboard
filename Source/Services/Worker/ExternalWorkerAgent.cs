@@ -265,6 +265,19 @@ namespace FastBuild.Dashboard.Services.Worker
 			this.OnWorkerStarted();
 		}
 
+		public void KillWorker()
+		{
+			try
+			{
+				Process proc = Process.GetProcessById((int)_workerProcessId);
+				proc.Kill();
+			}
+			catch (Exception)
+			{
+				// Nothing to do.
+			}
+		}
+
 		public void SetCoreCount(int coreCount)
 		{
 			var comboBoxPtr = this.GetChildWindow(3, "ComboBox");

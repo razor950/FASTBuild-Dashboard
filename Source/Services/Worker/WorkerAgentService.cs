@@ -68,6 +68,8 @@ namespace FastBuild.Dashboard.Services.Worker
 			}
 		}
 
+		public void KillWorker() => _workerAgent.KillWorker();
+
 		public WorkerCoreStatus[] GetStatus() => _workerAgent.GetStatus();
 	}
 }

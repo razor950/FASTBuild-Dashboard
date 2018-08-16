@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Timers;
 using Caliburn.Micro;
 using FastBuild.Dashboard.Configuration;
 using FastBuild.Dashboard.Services;
@@ -60,6 +61,14 @@ namespace FastBuild.Dashboard
 
 			if (App.Current.DoNotSpawnShadowExecutable || App.Current.IsShadowProcess)
 			{
+				if (App.Current.IsShadowProcess)
+				{
+					AppBootstrapper.UpdateOriginal(e);
+					var checkTimer = new Timer(1000*60*15); // Check for changes every 15 minutes.
+					checkTimer.Elapsed += (senderTimer, eTimer) => AppBootstrapper.UpdateOriginal(e);
+					checkTimer.AutoReset = true;
+					checkTimer.Enabled = true;
+				}
 				this.DisplayRootViewFor<MainWindowViewModel>();
 			}
 			else
@@ -74,6 +83,72 @@ namespace FastBuild.Dashboard
 		{
 			var shadowContext = new ShadowContext();
 			shadowContext.Save(shadowPath);
+		}
+
+		private static void UpdateOriginal(StartupEventArgs e)
+		{
+			var brokeragePath = IoC.Get<IBrokerageService>().BrokeragePath;
+			var networkCheckPath = Path.Combine(brokeragePath, "FBDashboard", "FBDashboard.exe");
+			var originalProcPath = App.Current.ShadowContext.OriginalLocation;
+
+			try
+			{
+				bool filesChanged = false;
+
+				if (File.Exists(networkCheckPath))
+				{
+					bool bFilesAreEqual = new FileInfo(networkCheckPath).Length == new FileInfo(originalProcPath).Length &&
+						File.ReadAllBytes(networkCheckPath).SequenceEqual(File.ReadAllBytes(originalProcPath));
+					// If files are not equal. Copy newer version from network location over original file.
+					if (!bFilesAreEqual)
+					{
+						if (File.Exists(originalProcPath))
+						{
+							File.Delete(originalProcPath);
+						}
+						File.Copy(networkCheckPath, originalProcPath);
+						filesChanged = true;
+					}
+
+					var workerNetworkPath = Path.Combine(Path.GetDirectoryName(networkCheckPath), "FBuild", "FBuildWorker.exe");
+					var workerTargetPath = Path.Combine(Path.GetDirectoryName(originalProcPath), "FBuild", "FBuildWorker.exe");
+
+					if (File.Exists(workerNetworkPath) && File.Exists(workerTargetPath))
+					{
+						bool bFilesAreEqualWorker = new FileInfo(workerNetworkPath).Length == new FileInfo(workerTargetPath).Length &&
+						File.ReadAllBytes(workerNetworkPath).SequenceEqual(File.ReadAllBytes(workerTargetPath));
+						// If files are not equal. Copy newer version from network location over original file.
+						if (!bFilesAreEqualWorker)
+						{
+							File.Delete(workerTargetPath);
+							File.Copy(workerNetworkPath, workerTargetPath);
+							filesChanged = true;
+						}
+					}
+				}
+
+				// Files changed try to run original binary to update shadow process.
+				if (filesChanged)
+				{
+					IoC.Get<IWorkerAgentService>().KillWorker();
+					SingleInstance<App>.Cleanup();
+					Process.Start(new ProcessStartInfo
+					{
+						FileName = originalProcPath,
+						Arguments = string.Join(" ", e.Args).Replace(AppArguments.ShadowProc, ""),
+						WorkingDirectory = Path.GetDirectoryName(originalProcPath)
+					});
+					Environment.Exit(0);
+				}
+			}
+			catch (UnauthorizedAccessException)
+			{
+				// may be already running
+			}
+			catch (IOException)
+			{
+				// may be already running
+			}
 		}
 
 		private static void SpawnShadowProcess(StartupEventArgs e, string assemblyLocation)

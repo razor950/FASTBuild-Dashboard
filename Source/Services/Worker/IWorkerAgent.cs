@@ -9,6 +9,7 @@ namespace FastBuild.Dashboard.Services.Worker
 		void SetCoreCount(int coreCount);
 		void SetWorkerMode(WorkerMode mode);
 		void Initialize();
+		void KillWorker();
 		WorkerCoreStatus[] GetStatus();
 	}
 }

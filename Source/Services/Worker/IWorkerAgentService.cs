@@ -9,6 +9,7 @@ namespace FastBuild.Dashboard.Services.Worker
 		bool IsRunning { get; }
 		event EventHandler<WorkerRunStateChangedEventArgs> WorkerRunStateChanged;
 		void Initialize();
+		void KillWorker();
 		WorkerCoreStatus[] GetStatus();
 	}
 }
