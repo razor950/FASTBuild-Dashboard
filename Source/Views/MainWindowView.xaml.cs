@@ -50,6 +50,7 @@ namespace FastBuild.Dashboard.Views
 
 			vm.BuildWatcherPage.WorkingStateChanged += this.BuildWatcherPage_WorkingStateChanged;
 			vm.SettingsPage.WorkerModeChanged += this.SettingsPage_WorkerModeChanged;
+			vm.WorkerPage.WorkerModeChanged += this.WorkerPage_WorkerModeChanged;
 			_viewModel = vm;
 		}
 
@@ -62,6 +63,11 @@ namespace FastBuild.Dashboard.Views
 		private void SettingsPage_WorkerModeChanged(object sender, WorkerMode mode)
 		{
 			UpdateTrayIcon();
+		}
+
+		private void WorkerPage_WorkerModeChanged(object sender, WorkerMode mode)
+		{
+			ChangeWorkerMode((int)mode);
 		}
 
 		private void InitializeWindowDimensions()

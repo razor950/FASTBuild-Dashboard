@@ -1,6 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Timers;
+using System.IO;
+using System.Net;
 using Caliburn.Micro;
+using FastBuild.Dashboard.Services.Worker;
+using FastBuild.Dashboard.Services;
 using FastBuild.Dashboard.Services.Worker;
 
 namespace FastBuild.Dashboard.ViewModels.Worker
@@ -50,6 +55,8 @@ namespace FastBuild.Dashboard.ViewModels.Worker
 			= new BindableCollection<WorkerCoreStatusViewModel>();
 
 		private bool _isTicking;
+
+		public event EventHandler<WorkerMode> WorkerModeChanged;
 
 		public WorkerViewModel()
 		{
@@ -111,7 +118,59 @@ namespace FastBuild.Dashboard.ViewModels.Worker
 				this.StatusTitle = "Idle";
 			}
 
+			CheckWorkerBlacklist();
+
 			_isTicking = false;
+		}
+
+		private void CheckWorkerBlacklist()
+		{
+			var brokeragePath = IoC.Get<IBrokerageService>().BrokeragePath;
+			var blacklistFile = Path.Combine(brokeragePath, "blacklist.txt");
+			var whitelistFile = Path.Combine(brokeragePath, "whitelist.txt");
+
+			try
+			{
+				var hostName = Dns.GetHostName();
+
+				if (File.Exists(blacklistFile))
+				{
+					string[] blacklist = File.ReadAllLines(blacklistFile);
+					foreach (string s in blacklist)
+					{
+						if (s == hostName)
+						{
+							if (_workerAgentService.WorkerMode != WorkerMode.Disabled)
+							{
+								_workerAgentService.WorkerMode = WorkerMode.Disabled;
+								this.WorkerModeChanged?.Invoke(this, _workerAgentService.WorkerMode);
+							}
+							return;
+						}
+					}
+				}
+
+				if (File.Exists(whitelistFile))
+				{
+					string[] whitelist = File.ReadAllLines(whitelistFile);
+					foreach (string s in whitelist)
+					{
+						if (s == hostName)
+						{
+							if (_workerAgentService.WorkerMode != WorkerMode.WorkWhenIdle)
+							{
+								_workerAgentService.WorkerMode = WorkerMode.WorkWhenIdle;
+								this.WorkerModeChanged?.Invoke(this, _workerAgentService.WorkerMode);
+							}
+							return;
+						}
+					}
+				}
+			}
+			catch (Exception)
+			{
+				// Don't worry about it. Not critical.
+			}
 		}
 
 		private void WorkerAgentService_WorkerRunStateChanged(object sender, WorkerRunStateChangedEventArgs e)
