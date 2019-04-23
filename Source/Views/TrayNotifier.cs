@@ -34,13 +34,14 @@ namespace FastBuild.Dashboard.Views
 			_trayNotifier.ContextMenuStrip.Items.Add("Work Always", GetImage("/Resources/Icons/tray_working_all_16.ico"), (sender, args) => MenuChangeWorkerMode(2));
 			_trayNotifier.ContextMenuStrip.Items.Add("Work when Idle", GetImage("/Resources/Icons/tray_normal_16.ico"), (sender, args) => MenuChangeWorkerMode(1));
 			_trayNotifier.ContextMenuStrip.Items.Add("Disabled", GetImage("/Resources/Icons/tray_disabled_16.ico"), (sender, args) => MenuChangeWorkerMode(0));
+			_trayNotifier.ContextMenuStrip.Items.Add("Quit Dashboard", GetImage("/Resources/Icons/tray_normal_16.ico"), this.TrayNotifier_QuitClicked);
 
 			this.UseNormalIcon();
 		}
 
 		private void TrayNotifier_DoubleClick(object sender, EventArgs e) => _owner.ShowAndActivate();
-
 		private void WorkingIconTimer_Tick(object sender, EventArgs e) => this.ShiftWorkingIcon();
+
 		public void UseNormalIcon()
 		{
 			_workingIconTimer.Stop();
@@ -99,6 +100,12 @@ namespace FastBuild.Dashboard.Views
 		private void MenuChangeWorkerMode(int workerMode)
 		{
 			_owner.ChangeWorkerMode(workerMode);
+		}
+
+		private void TrayNotifier_QuitClicked(object sender, EventArgs e)
+		{
+			_owner.ClosingFromTray();
+			_owner.Close();
 		}
 	}
 }
