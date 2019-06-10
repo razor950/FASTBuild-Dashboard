@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Threading;
+using System.ComponentModel;
 using Caliburn.Micro;
 using FastBuild.Dashboard.Configuration;
 using FastBuild.Dashboard.ViewModels;
@@ -14,6 +15,7 @@ namespace FastBuild.Dashboard.Views
 		private readonly TrayNotifier _trayNotifier;
 		private bool _isWorking;
 		private MainWindowViewModel _viewModel;
+		private bool _isClosingFromTray = false;
 
 		public MainWindowView()
 		{
@@ -38,6 +40,22 @@ namespace FastBuild.Dashboard.Views
 		{
 			_trayNotifier.Close();
 			base.OnClosed(e);
+		}
+
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			if (!_isClosingFromTray)
+			{
+				e.Cancel = true;
+				Hide();
+			}
+			
+			base.OnClosing(e);
+		}
+
+		public void ClosingFromTray()
+		{
+			_isClosingFromTray = true;
 		}
 
 		private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
