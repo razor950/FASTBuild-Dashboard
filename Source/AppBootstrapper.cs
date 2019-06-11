@@ -73,6 +73,7 @@ namespace FastBuild.Dashboard
 			}
 			else
 			{
+				System.Threading.Thread.Sleep(5000); // Wait few seconds to spawn shadow process. It might be still locked after update.
 				AppBootstrapper.SpawnShadowProcess(e, assemblyLocation);
 				Environment.Exit(0);
 			}
