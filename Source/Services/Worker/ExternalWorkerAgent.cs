@@ -280,7 +280,7 @@ namespace FastBuild.Dashboard.Services.Worker
 
 		public void SetCoreCount(int coreCount)
 		{
-			var comboBoxPtr = this.GetChildWindow(3, "ComboBox");
+			var comboBoxPtr = this.GetChildWindow(5, "ComboBox");
 
 			if (comboBoxPtr == IntPtr.Zero)
 			{
