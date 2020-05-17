@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +44,7 @@ namespace FastBuild.Dashboard.Services
 		{
 			_workerNames = new string[0];
 
-			var checkTimer = new Timer(5000);
+			var checkTimer = new Timer(30000);
 			checkTimer.Elapsed += this.CheckTimer_Elapsed;
 			checkTimer.AutoReset = true;
 			checkTimer.Enabled = true;
