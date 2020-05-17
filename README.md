@@ -1,4 +1,5 @@
 # FASTBuild Dashboard
+[![Build status](https://ci.appveyor.com/api/projects/status/jgm6r8q2hef06vkl?svg=true)](https://ci.appveyor.com/project/storm20200/fastbuild-dashboard)
 
 FASTBuild ([website](http://www.fastbuild.org/) or [GitHub repository](https://github.com/fastbuild/fastbuild)) is an amazing distributed building system. It can drastically shorten your build time by utilizing its distributed and cached building mechanisms.
 
