@@ -20,6 +20,8 @@ namespace FastBuild.Dashboard.Services.Worker
 		public bool IsRunning { get; private set; }
 
 		private bool _hasAppExited;
+		private Task _guardianTask;
+		private CancellationTokenSource _guardianTokenSource;
 
 		public event EventHandler<WorkerRunStateChangedEventArgs> WorkerRunStateChanged;
 
@@ -28,7 +30,11 @@ namespace FastBuild.Dashboard.Services.Worker
 			Application.Current.Exit += this.Application_Exit;
 		}
 
-		private void Application_Exit(object sender, ExitEventArgs e) => _hasAppExited = true;
+		private void Application_Exit(object sender, ExitEventArgs e)
+		{
+			_hasAppExited = true;
+			this.KillWorker();
+		}
 
 		public void Initialize()
 		{
@@ -159,7 +165,13 @@ namespace FastBuild.Dashboard.Services.Worker
 			return result;
 		}
 
-		private void StartWorkerGuardian() => Task.Factory.StartNew(this.WorkerGuardian);
+		private void StartWorkerGuardian()
+		{
+			_guardianTokenSource = new CancellationTokenSource();
+			_guardianTask = Task.Factory.StartNew(this.WorkerGuardian, _guardianTokenSource.Token);
+
+			Debug.Assert(_guardianTokenSource.Token.CanBeCanceled);
+		}
 
 		private void WorkerGuardian()
 		{
@@ -269,8 +281,22 @@ namespace FastBuild.Dashboard.Services.Worker
 		{
 			try
 			{
+				if (_guardianTask != null && !_guardianTask.IsCompleted)
+				{
+					_guardianTokenSource.Cancel();
+				}
+
+				IsRunning = false;
+				if (_workerWindowPtr != IntPtr.Zero)
+				{
+					WinAPIUtils.RequestQuit(_workerWindowPtr);
+				}
+
 				Process proc = Process.GetProcessById((int)_workerProcessId);
-				proc.Kill();
+				if (!proc.WaitForExit(1000))
+				{
+					proc.Kill();
+				}
 			}
 			catch (Exception)
 			{

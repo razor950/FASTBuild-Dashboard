@@ -27,6 +27,7 @@ namespace FastBuild.Dashboard.Services.Worker
 
 			public enum WindowsMessages
 			{
+				WM_QUIT = 0x0012,
 				WM_COMMAND = 0x0111
 			}
 
@@ -207,6 +208,11 @@ namespace FastBuild.Dashboard.Services.Worker
 				var controlId = WinAPI.GetWindowLongPtr(hWnd, (int)WinAPI.GetWindowLongIndexes.GWL_ID).ToInt32();
 				WinAPI.PostMessage(parentHwnd, (int)WinAPI.WindowsMessages.WM_COMMAND,
 					WinAPIUtils.MakeWParam(controlId, (int)WinAPI.ComboBoxNotifications.CBN_SELCHANGE), hWnd);
+			}
+
+			public static void RequestQuit(IntPtr hWnd)
+			{
+				WinAPI.SendMessage(hWnd, (int)WinAPI.WindowsMessages.WM_QUIT, 0, IntPtr.Zero);
 			}
 
 			public static string GetWindowText(IntPtr hWnd)
