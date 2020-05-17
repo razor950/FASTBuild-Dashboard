@@ -78,6 +78,7 @@ namespace FastBuild.Dashboard.Services
 
 					this.WorkerNames = Directory.GetFiles(this._workerPoolPath)
 						.Select(Path.GetFileName)
+						.TakeWhile(worker => IsWorkerActive(Path.Combine(this._workerPoolPath, worker)))
 						.ToArray();
 				}
 				catch (IOException)
