@@ -4,7 +4,6 @@ using System.Timers;
 using System.IO;
 using System.Net;
 using Caliburn.Micro;
-using FastBuild.Dashboard.Services.Worker;
 using FastBuild.Dashboard.Services;
 using FastBuild.Dashboard.Services.Worker;
 
