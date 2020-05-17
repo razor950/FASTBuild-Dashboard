@@ -11,7 +11,7 @@ namespace FastBuild.Dashboard.ViewModels.Settings
 		{
 			if (!Directory.Exists(brokeragePath))
 			{
-				return new ValidationResult("brokerage path not existed", new[] { nameof(SettingsViewModel.BrokeragePath) });
+				return new ValidationResult("Brokerage path doesn't exist", new[] { nameof(SettingsViewModel.BrokeragePath) });
 			}
 
 			return ValidationResult.Success;
@@ -23,7 +23,7 @@ namespace FastBuild.Dashboard.ViewModels.Settings
 			{
 				if (!File.Exists(editorPath))
 				{
-					return new ValidationResult("specified editor path not existed",
+					return new ValidationResult("Specified editor path does not exist",
 						new[] {nameof(SettingsViewModel.ExternalSourceEditorPath)});
 				}
 			}
@@ -31,7 +31,7 @@ namespace FastBuild.Dashboard.ViewModels.Settings
 			{
 				if (!IoC.Get<IExternalSourceEditorService>().IsSelectedEditorAvailable)
 				{
-					return new ValidationResult("the editor cannot be found at your Program Files, please locate it here",
+					return new ValidationResult("The editor cannot be found in Program Files, please locate it here",
 						new[] { nameof(SettingsViewModel.ExternalSourceEditorPath) });
 				}
 			}
