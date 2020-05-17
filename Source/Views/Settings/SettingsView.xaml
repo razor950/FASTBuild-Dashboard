@@ -151,6 +151,7 @@
                             <ComboBox SelectedIndex="{Binding WorkerMode, Mode=TwoWay}">
                                 <ComboBoxItem Content="Disabled" />
                                 <ComboBoxItem Content="Work when Idle" />
+                                <ComboBoxItem Content="Work Proportionally to CPU Usage" />
                                 <ComboBoxItem Content="Work Always" />
                             </ComboBox>
                         </Grid>

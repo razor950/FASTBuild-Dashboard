@@ -4,6 +4,7 @@
 	{
 		Disabled = 0,
 		WorkWhenIdle = 1,
-		WorkAlways = 2
+		WorkProportional = 2,
+		WorkAlways = 3
 	}
 }

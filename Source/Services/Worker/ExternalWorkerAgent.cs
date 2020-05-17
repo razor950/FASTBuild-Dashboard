@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -301,7 +301,21 @@ namespace FastBuild.Dashboard.Services.Worker
 				return;
 			}
 
-			WinAPIUtils.SetComboBoxSelectedIndex(comboBoxPtr, (int)mode);
+			WinAPIUtils.SetComboBoxSelectedIndex(comboBoxPtr, GetExternalWorkerModeIndex(mode));
+		}
+
+		private int GetExternalWorkerModeIndex(WorkerMode mode)
+		{
+			switch (mode)
+			{
+				case WorkerMode.Disabled: return 0;
+				case WorkerMode.WorkWhenIdle: return 1;
+				case WorkerMode.WorkProportional: return 3;
+				case WorkerMode.WorkAlways: return 2;
+				default:
+					Debug.Assert(false, "Unsupported worker mode");
+					return 0;
+			}
 		}
 	}
 }
