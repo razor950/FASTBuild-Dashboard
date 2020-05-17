@@ -1,0 +1,7 @@
+version: 1.00.{build}
+image: Visual Studio 2017
+configuration:
+- Debug
+- Release
+before_build:
+- nuget restore "Source/FASTBuild.Dashboard.sln"
