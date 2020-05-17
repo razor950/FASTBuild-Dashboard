@@ -1,13 +1,17 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Timers;
 
 namespace FastBuild.Dashboard.Services
 {
 	internal class BrokerageService : IBrokerageService
 	{
-		private const string WorkerPoolRelativePath = @"main\16";
+		private const string WorkerPoolRelativePath = "main";
+
+		private string _workerPoolPath;
 
 		private string[] _workerNames;
 
@@ -67,7 +71,12 @@ namespace FastBuild.Dashboard.Services
 
 				try
 				{
-					this.WorkerNames = Directory.GetFiles(Path.Combine(brokeragePath, WorkerPoolRelativePath))
+					if (string.IsNullOrEmpty(this._workerPoolPath))
+					{
+						this._workerPoolPath = FindWorkerPoolPath();
+					}
+
+					this.WorkerNames = Directory.GetFiles(this._workerPoolPath)
 						.Select(Path.GetFileName)
 						.ToArray();
 				}
@@ -80,6 +89,44 @@ namespace FastBuild.Dashboard.Services
 			{
 				_isUpdatingWorkers = false;
 			}
+		}
+
+		private string FindWorkerPoolPath()
+		{
+			try
+			{
+				var hostName = Dns.GetHostName();
+				var workerPoolPath = Path.Combine(this.BrokeragePath, WorkerPoolRelativePath);
+
+				// Search for the most recent protocol version used by this machine.
+				return Directory.GetDirectories(workerPoolPath, "*.windows")
+					.OrderByDescending(Path.GetFileName, Comparer<string>.Create((pool1, pool2) =>
+					{
+						// Ensure correct numeric sorting, e.g. 12 comes after 2.
+						int version1, version2;
+						if (Int32.TryParse(pool1.Substring(0, pool1.IndexOf('.')), out version1) &&
+							Int32.TryParse(pool2.Substring(0, pool2.IndexOf('.')), out version2))
+						{
+							return version1.CompareTo(version2);
+						}
+
+						return 0;
+					}))
+					.First(versionPath =>
+					{
+						var hostFilePath = Path.Combine(workerPoolPath, versionPath, hostName);
+						return File.Exists(hostFilePath) && IsWorkerActive(hostFilePath);
+					});
+			}
+			catch (Exception)
+			{
+				throw new IOException("Unable to find the worker pool of the current host");
+			}
+		}
+
+		private bool IsWorkerActive(string workerFilePath)
+		{
+			return File.GetLastWriteTimeUtc(workerFilePath).AddMinutes(2.0) >= DateTime.UtcNow;
 		}
 	}
 }
