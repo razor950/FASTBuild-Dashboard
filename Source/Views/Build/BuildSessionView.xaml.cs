@@ -52,7 +52,7 @@ namespace FastBuild.Dashboard.Views.Build
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (horizontalOffset == _previousHorizontalScrollOffset)    // which means the scroll is not actually changed, but content size is changed
 				{
-					this.ContentScrollViewer.ScrollToHorizontalOffset(this.ContentScrollViewer.ScrollableWidth);
+					this.ContentScrollViewer.ScrollToRightEnd();
 					horizontalOffset = this.ContentScrollViewer.ScrollableWidth;
 				}
 			}
