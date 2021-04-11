@@ -31,7 +31,14 @@ namespace FastBuild.Dashboard.Communication
 #if DEBUG && DEBUG_TEST_LOG
 			_logPath = @"Test\FastBuildLog.log";
 #else
-			_logPath = Path.Combine(Path.GetTempPath(), LogRelativePath);
+			var path = Path.GetTempPath();
+			var fastbuildTempPath = Environment.GetEnvironmentVariable("FASTBUILD_TEMP_PATH");
+			if (fastbuildTempPath != null && System.IO.Directory.Exists(fastbuildTempPath))
+			{
+				path = fastbuildTempPath;
+			}
+
+			_logPath = Path.Combine(path, LogRelativePath);
 #endif
 		}
 
